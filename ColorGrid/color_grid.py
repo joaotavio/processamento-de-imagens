@@ -1,5 +1,13 @@
 import numpy as np
 import cv2
+from random import randint
+
+def getColorGrid(color, n_lines, n_columns, proportion):
+	grid = np.empty((n_lines, n_columns, 3), np.float64)
+	grid[:, :, 0] = proportion * color[2] # blue
+	grid[:, :, 1] = proportion * color[1] # green
+	grid[:, :, 2] = proportion * color[0] # red
+	return grid
 
 # c1 = top left color. Format (R, G, B)
 # c2 = top right color. Format (R, G, B)
@@ -9,41 +17,46 @@ def makeColorGrid(c1, c2, c3, c4, n_lines, n_columns, window_width=500, window_h
 	TILE_WIDTH = window_width / n_columns
 	TILE_HEIGHT = window_height / n_lines
 
-	colors = np.zeros((n_lines, n_columns, 3))
-	
-	# LEFT
-	colors[:, 0, 2] = np.linspace(c1[0], c3[0], n_lines) # RED
-	colors[:, 0, 1] = np.linspace(c1[1], c3[1], n_lines) # GREEN
-	colors[:, 0, 0] = np.linspace(c1[2], c3[2], n_lines) # BLUE
+	x = np.linspace(255, 0, n_lines)
+	y = np.linspace(255, 0, n_columns)
+	xv, yv = np.meshgrid(x, y)
+	proportionGrid = (xv * yv) / (255*255)
 
-	# RIGHT
-	colors[:, -1, 2] = np.linspace(c2[0], c4[0], n_lines) # RED
-	colors[:, -1, 1] = np.linspace(c2[1], c4[1], n_lines) # GREEN
-	colors[:, -1, 0] = np.linspace(c2[2], c4[2], n_lines) # BLUE
+	topleft = getColorGrid(c1, n_lines, n_columns, proportionGrid)
 
-	for i in range(n_lines):
-		color1 = colors[i, 0]
-		color2 = colors[i, -1]
-		
-		colors[i, :, 2] = np.linspace(color1[2], color2[2], n_columns) # RED
-		colors[i, :, 1] = np.linspace(color1[1], color2[1], n_columns) # GREEN
-		colors[i, :, 0] = np.linspace(color1[0], color2[0], n_columns) # BLUE
+	proportionGrid = np.rot90(proportionGrid);
 
+	bottomleft = getColorGrid(c3, n_lines, n_columns, proportionGrid)
+
+	proportionGrid = np.rot90(proportionGrid);
+
+	bottomright = getColorGrid(c4, n_lines, n_columns, proportionGrid)
+
+	proportionGrid = np.rot90(proportionGrid);
+
+	topright = getColorGrid(c2, n_lines, n_columns, proportionGrid)
+
+	colors = topleft + topright + bottomleft + bottomright
 
 	# OpenCV uses the 0 to 1 range for RGB color
 	colors = colors / 255.0
 
 	# Creates the image with the colors
 	image = colors.repeat(TILE_HEIGHT, axis=0).repeat(TILE_WIDTH, axis=1)
-
+	
 	cv2.imshow('Color grid', image)
 	cv2.waitKey(0)
 	cv2.destroyAllWindows()
+	
 
+def randomColor():
+	return (randint(0, 255), randint(0, 255), randint(0, 255))
 
 # MAIN
 if __name__ == '__main__':
-	#makeColorGrid((0,0,0), (255,255,255),(0,255,0),(0,0,255), 70)
+	#makeColorGrid((0,0,0), (255,255,255),(0,255,0),(0,0,255), 70, 70)
 	makeColorGrid((232, 149, 139), (48, 113, 181), (218, 239, 125), (0, 205, 217), 5, 5)
-	makeColorGrid((232, 149, 139), (48, 113, 181), (218, 239, 125), (0, 205, 217), 100, 100)
+	#makeColorGrid((232, 149, 139), (48, 113, 181), (218, 239, 125), (0, 205, 217), 100, 100)
+	#makeColorGrid(randomColor(), randomColor(), randomColor(), randomColor(), 10, 10);
+
 
