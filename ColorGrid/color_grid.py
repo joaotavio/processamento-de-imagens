@@ -21,22 +21,18 @@ def makeColorGrid(c1, c2, c3, c4, n_lines, n_columns, window_width=500, window_h
 	y = np.linspace(1, 0, n_lines)
 	xv, yv = np.meshgrid(x, y)
 	proportionGrid = xv * yv
-	print(proportionGrid)
 
 	topleft = getColorGrid(c1, n_lines, n_columns, proportionGrid)
 
 	proportionGrid = np.flipud(proportionGrid);
-	print(proportionGrid)
 
 	bottomleft = getColorGrid(c3, n_lines, n_columns, proportionGrid)
 
 	proportionGrid = np.fliplr(proportionGrid);
-	print(proportionGrid)
 
 	bottomright = getColorGrid(c4, n_lines, n_columns, proportionGrid)
 
 	proportionGrid = np.flipud(proportionGrid);
-	print(proportionGrid)
 
 	topright = getColorGrid(c2, n_lines, n_columns, proportionGrid)
 
